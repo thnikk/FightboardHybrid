@@ -1,10 +1,10 @@
 /************************************************************************************
  * LED Controller
- * 
+ *
  * Some effects borrowed from:
  * https://www.tweaking4all.com/hardware/arduino/arduino-all-ledstrip-effects-in-one/
  * https://www.tweaking4all.com/forum/miscellaneous-software/lego-millenium-falcon-with-all-ledstrip-effects-in-one-fastled/
- * 
+ *
  * Adding a new effect:
  * - Create a new function with the prefix `effect`
  * - Add function call as switch case in main loop
@@ -14,7 +14,8 @@
 #ifndef _LED_MAPPER_
 #define _LED_MAPPER_
 
-#include <Adafruit_NeoPixel.h>
+#include <FastLED.h>
+#include "FastLED_RGBW.h"
 
 #define LED_PIN 5
 #define LED_COUNT 12
@@ -49,41 +50,32 @@ const int ColumnMatrix[COLUMN_COUNT][COLUMN_HEIGHT] = {
 };
 
 struct ButtonColorMap {
-	ButtonColorMap(uint8_t bi, uint32_t bc)
+	ButtonColorMap(uint8_t bi, CHSV bc)
 		: buttonIndex(bi), buttonColor(bc) { }
 	uint8_t buttonIndex;
-	uint32_t buttonColor;
+	CHSV buttonColor;
 };
 
-Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRBW + NEO_KHZ800);
+CRGBW leds[LED_COUNT];
+CRGB *ledsRGB = (CRGB *) &leds[0];
 
-uint32_t wheel(byte pos) {
-	pos = 255 - pos;
-	if (pos < 85) {
-		return strip.Color(255 - pos * 3, 0, pos * 3);
-	}
-	if (pos < 170) {
-		pos -= 85;
-		return strip.Color(0, pos * 3, 255 - pos * 3);
-	}
-	pos -= 170;
-	return strip.Color(pos * 3, 255 - pos * 3, 0);
-}
+// Set colors with hue, saturation, and value
+// These values should be tuned
+CHSV ColorBlack     = CHSV(   0,   0,   0);
+CHSV ColorWhite     = CHSV(   0,   0, 255);
 
-static const uint32_t ColorBlack     = strip.Color(  0,   0,   0,   0);
-static const uint32_t ColorWhite     = strip.Color(  0,   0,   0, 255);
-static const uint32_t ColorRed       = strip.Color(255,   0,   0,   0);
-static const uint32_t ColorOrange    = strip.Color(255, 128,   0,   0);
-static const uint32_t ColorYellow    = strip.Color(255, 255,   0,   0);
-static const uint32_t ColorLimeGreen = strip.Color(128, 255,   0,   0);
-static const uint32_t ColorGreen     = strip.Color(  0, 255,   0,   0);
-static const uint32_t ColorSeafoam   = strip.Color(  0, 255, 128,   0);
-static const uint32_t ColorAqua      = strip.Color(  0, 255, 255,   0);
-static const uint32_t ColorSkyBlue   = strip.Color(  0, 128, 255,   0);
-static const uint32_t ColorBlue      = strip.Color(  0,   0, 255,   0);
-static const uint32_t ColorPurple    = strip.Color(128,   0, 255,   0);
-static const uint32_t ColorPink      = strip.Color(255,   0, 255,   0);
-static const uint32_t ColorMagenta   = strip.Color(255,   0, 128,   0);
+CHSV ColorRed       = CHSV(   0, 255, 255);
+CHSV ColorOrange    = CHSV(  20, 255, 255);
+CHSV ColorYellow    = CHSV(  40, 255, 255);
+CHSV ColorLimeGreen = CHSV(  60, 255, 255);
+CHSV ColorGreen     = CHSV(  80, 255, 255);
+CHSV ColorSeafoam   = CHSV( 100, 255, 255);
+CHSV ColorAqua      = CHSV( 120, 255, 255);
+CHSV ColorSkyBlue   = CHSV( 140, 255, 255);
+CHSV ColorBlue      = CHSV( 160, 255, 255);
+CHSV ColorPurple    = CHSV( 180, 255, 255);
+CHSV ColorPink      = CHSV( 200, 255, 255);
+CHSV ColorMagenta   = CHSV( 220, 255, 255);
 
 const ButtonColorMap StaticRainbowButtonMapping[LED_COUNT] = {
 	ButtonColorMap(LED_INDEX_LEFT, ColorRed),
@@ -224,13 +216,12 @@ inline void applyColorMapping(const ButtonColorMap colorMapping[LED_COUNT]) __at
 inline void showLeds() __attribute__((always_inline));
 
 void configureLeds() {
-	strip.begin();
-	strip.setBrightness(128); // 50% Brightness
+    FastLED.addLeds<WS2812B, LED_PIN, RGB>(ledsRGB, getRGBWsize(LED_COUNT));
 }
 
 void applyColorMapping(const ButtonColorMap colorMapping[LED_COUNT]) {
 	for (uint8_t i = 0; i < LED_COUNT; i++)
-		strip.setPixelColor(colorMapping[i].buttonIndex, colorMapping[i].buttonColor);
+		leds[colorMapping[i].buttonIndex] = colorMapping[i].buttonColor;
 
 	showLeds();
 }
@@ -263,7 +254,7 @@ void selectEffect(LedEffectMode mode) {
 }
 
 void showLeds() {
-	strip.show();
+	FastLED.show();
 }
 
 #endif
