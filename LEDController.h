@@ -15,7 +15,6 @@
 #define _LED_MAPPER_
 
 #include <FastLED.h>
-#include "FastLED_RGBW.h"
 
 #define LED_PIN 5
 #define LED_COUNT 12
@@ -56,8 +55,7 @@ struct ButtonColorMap {
 	CHSV buttonColor;
 };
 
-CRGBW leds[LED_COUNT];
-CRGB *ledsRGB = (CRGB *) &leds[0];
+CRGB leds[LED_COUNT];
 
 // Set colors with hue, saturation, and value
 // These values should be tuned
@@ -216,7 +214,7 @@ inline void applyColorMapping(const ButtonColorMap colorMapping[LED_COUNT]) __at
 inline void showLeds() __attribute__((always_inline));
 
 void configureLeds() {
-    FastLED.addLeds<WS2812B, LED_PIN, RGB>(ledsRGB, getRGBWsize(LED_COUNT));
+    FastLED.addLeds<SK6812, LED_PIN, RGB>(leds, LED_COUNT);
 }
 
 void applyColorMapping(const ButtonColorMap colorMapping[LED_COUNT]) {
