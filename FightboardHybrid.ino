@@ -11,7 +11,9 @@
 #define EEPROM_LED_MODE_OFFSET 3
 
 #define AXIS_MIN 0
+#define AXIS_LOW 64
 #define AXIS_MID 128
+#define AXIS_HIGH 192
 #define AXIS_MAX 255
 
 typedef enum {
@@ -62,7 +64,7 @@ void loop() {
 	setButton(board.MapButtonK1, portStates, lastButtonStates);
 	setButton(board.MapButtonK2, portStates, lastButtonStates);
 	setButton(board.MapButtonK3, portStates, lastButtonStates);
-	setButton(board.MapButtonK4, portStates, lastButtonStates);
+	/*setButton(board.MapButtonK4, portStates, lastButtonStates);*/
 	setButton(board.MapButtonSelect, portStates, lastButtonStates);
 	setButton(board.MapButtonStart, portStates, lastButtonStates);
 	setButton(board.MapButtonLogo, portStates, lastButtonStates);
@@ -182,15 +184,29 @@ void setDpad(uint8_t portStates[], uint8_t lastDpadStates[]) {
 			buttonStatus[BUTTONLEFT] = 0;
 			buttonStatus[BUTTONRIGHT] = 0;
 
-			if (up && right) { buttonStatus[AXISLY] = AXIS_MIN; buttonStatus[AXISLX] = AXIS_MAX; }
-			else if (down && right) { buttonStatus[AXISLY] = AXIS_MAX; buttonStatus[AXISLX] = AXIS_MAX; }
-			else if (down && left) { buttonStatus[AXISLY] = AXIS_MAX; buttonStatus[AXISLX] = AXIS_MIN; }
-			else if (up && left){ buttonStatus[AXISLY] = AXIS_MIN; buttonStatus[AXISLX] = AXIS_MIN; }
-			else if (up) { buttonStatus[AXISLY] = AXIS_MIN; buttonStatus[AXISLX] = AXIS_MID; }
-			else if (down) { buttonStatus[AXISLY] = AXIS_MAX; buttonStatus[AXISLX] = AXIS_MID; }
-			else if (left) { buttonStatus[AXISLX] = AXIS_MIN; buttonStatus[AXISLY] = AXIS_MID; }
-			else if (right) { buttonStatus[AXISLX] = AXIS_MAX; buttonStatus[AXISLY] = AXIS_MID; }
-			else { buttonStatus[AXISLX] = AXIS_MID; buttonStatus[AXISLY] = AXIS_MID; }
+
+            if (digitalRead(PIN_K4)){
+                if (up && right) { buttonStatus[AXISLY] = AXIS_MIN; buttonStatus[AXISLX] = AXIS_MAX; }
+                else if (down && right) { buttonStatus[AXISLY] = AXIS_MAX; buttonStatus[AXISLX] = AXIS_MAX; }
+                else if (down && left) { buttonStatus[AXISLY] = AXIS_MAX; buttonStatus[AXISLX] = AXIS_MIN; }
+                else if (up && left){ buttonStatus[AXISLY] = AXIS_MIN; buttonStatus[AXISLX] = AXIS_MIN; }
+                else if (up) { buttonStatus[AXISLY] = AXIS_MIN; buttonStatus[AXISLX] = AXIS_MID; }
+                else if (down) { buttonStatus[AXISLY] = AXIS_MAX; buttonStatus[AXISLX] = AXIS_MID; }
+                else if (left) { buttonStatus[AXISLX] = AXIS_MIN; buttonStatus[AXISLY] = AXIS_MID; }
+                else if (right) { buttonStatus[AXISLX] = AXIS_MAX; buttonStatus[AXISLY] = AXIS_MID; }
+                else { buttonStatus[AXISLX] = AXIS_MID; buttonStatus[AXISLY] = AXIS_MID; }
+            }
+            else {
+                if (up && right) { buttonStatus[AXISLY] = AXIS_LOW; buttonStatus[AXISLX] = AXIS_HIGH; }
+                else if (down && right) { buttonStatus[AXISLY] = AXIS_HIGH; buttonStatus[AXISLX] = AXIS_HIGH; }
+                else if (down && left) { buttonStatus[AXISLY] = AXIS_HIGH; buttonStatus[AXISLX] = AXIS_LOW; }
+                else if (up && left){ buttonStatus[AXISLY] = AXIS_LOW; buttonStatus[AXISLX] = AXIS_LOW; }
+                else if (up) { buttonStatus[AXISLY] = AXIS_LOW; buttonStatus[AXISLX] = AXIS_MID; }
+                else if (down) { buttonStatus[AXISLY] = AXIS_HIGH; buttonStatus[AXISLX] = AXIS_MID; }
+                else if (left) { buttonStatus[AXISLX] = AXIS_LOW; buttonStatus[AXISLY] = AXIS_MID; }
+                else if (right) { buttonStatus[AXISLX] = AXIS_HIGH; buttonStatus[AXISLY] = AXIS_MID; }
+                else { buttonStatus[AXISLX] = AXIS_MID; buttonStatus[AXISLY] = AXIS_MID; }
+            }
 			break;
 
 		case RIGHT_ANALOG:
